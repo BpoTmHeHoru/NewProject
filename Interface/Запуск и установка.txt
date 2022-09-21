@@ -1,0 +1,12 @@
+Инуструкция для запуска проекта:
+
+    1. Загрузка:
+        установите Geth  https://geth.ethereum.org/docs/install-and-build/installing-geth
+        установите python https://www.python.org/downloads/
+
+    2. Зауск:
+        перейдите в папку проекта БДД
+        запустите start.bat
+        запустите start_front.bat
+        
+     
