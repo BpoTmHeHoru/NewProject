@@ -1,0 +1,22 @@
+{
+    "node1": {
+        "ip": "192.168.43.111",
+        "port": "8545",
+        "bootport": "30303"
+    },
+    "node2": {
+        "ip": "192.168.43.251",
+        "port": "8546",
+        "bootport": "30304"
+    },
+    "bnode": {
+        "ip": "192.168.43.111",
+        "enode": "enode://f7b3ffdf08b2348731ac841c92460653e4c158083f458d72024ec796e80d2fbccc0831786996d7601b8d18c0e32bc090d18af1c6cdf733563ff3a7026756236e@",
+        "bootport": "30301"
+    },
+    "contract": {
+        "address": "",
+        "abi":[],
+        "bytecode": ""
+    }
+}
