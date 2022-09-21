@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+
+{% block main %}
+
+<form method="post" class="form">
+    <h1>авторизация</h1>
+    <div class="in-form">
+        <label>account...</label>
+        <input type="text" name="acc" placeholder="Вам нужно ввести аддресс кошелка" autocomplete="off" required>
+    </div>
+    <div class="in-form">
+        <label>ключ...</label>
+        <input type="password" name="key" placeholder="Вам нужно ввести секретный ключ" autocomplete="off" required>
+    </div>
+    <div class="in-form">
+        <label>логин...</label>
+        <input type="text" name="login" placeholder="Вам нужно ввести ваш логин" autocomplete="off" required>
+    </div>
+    <div class="in-form">
+        <label>пароль...</label>
+        <input type="password" name="password" placeholder="Вам нужно ввести ваш пароль" autocomplete="off" required>
+    </div>
+    <button type="submit">авторизация</button>
+</form>
+
+
+
+{% endblock %}

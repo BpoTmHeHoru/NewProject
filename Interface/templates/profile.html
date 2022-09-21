@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+
+
+{% block main %}
+
+<form class="" novalidate method="post">
+    <div class="">
+      <label for="validationCustom01" class="form-label">Имя:</label>
+      <!-- <input type="text" class="form-control"  name={{res[0]}} required> -->
+    </div>
+    <div class="">
+      <label for="validationCustom02" class="form-label">Last name</label>
+      <input type="text" class="form-control"  value="Otto" required>
+    </div>
+    <div class="">
+      <button class="btn btn-primary" type="submit">Submit form</button>
+    </div>
+  </form>
+  <h2>{{res[1]}}</h2>
+
+{% endblock %}
