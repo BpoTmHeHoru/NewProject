@@ -52,8 +52,8 @@ contract main {
 
     struct User {
         string[3]   FIO;
-        bytes       Login;
-        bytes       Password;
+        string       Login;
+        string       Password;
         IdentifierCard Card;
         uint128     StartYear;
         uint64      AmountDTP;
@@ -98,8 +98,8 @@ contract main {
     /**
     * @dev Функция регистрации
     */
-    function reg(string[3] calldata _FIO, bytes calldata _login, bytes calldata _password) external returns (User memory) {
-        require(Users[msg.sender].Role != Roles.user);
+    function reg(string[3] calldata _FIO, string calldata _login, string calldata _password) external returns (User memory) {
+        require(Users[msg.sender].Role != Roles.user, "You are registration!");
         Users[msg.sender] = User(_FIO, _login, _password, Users[msg.sender].Card = IdentifierCard(0,0, Kategory.None),  0, 0, 0, 0, 0, Roles.user, false);
         return Users[msg.sender];
     }
@@ -107,9 +107,9 @@ contract main {
     /**
     * @dev Функция авторизации
     */
-    function auth(bytes memory _login, bytes memory _password) external view onlyUser returns (User memory) {
-        require(keccak256(Users[msg.sender].Login) == keccak256(_login), "Invalid Login" );
-        require(keccak256(Users[msg.sender].Password) == keccak256(_password), "Invalid Password" );
+    function auth(string memory _login, string memory _password) external view onlyUser returns (User memory) {
+        require(keccak256(bytes(Users[msg.sender].Login)) == keccak256(bytes(_login)), "Invalid Login" );
+        require(keccak256(bytes(Users[msg.sender].Password)) == keccak256(bytes(_password)), "Invalid Password" );
         return Users[msg.sender];
     }
 
@@ -118,7 +118,9 @@ contract main {
     *
     * Функция расчёта страховки 
     */
-    function calculateInsurance(address _to) internal onlyUser onlyINC returns(uint) {
+    function calculateInsurance(address _to) internal onlyUser  returns(uint) {
+        require(RegistrationCar[_to]._Kategory != Kategory.None, "Not Register car");
+         require(_to != address(0), "zero address!");
         uint128 _price  = RegistrationCar[_to].MarketPrice;
         uint128   delitel = 10;
         uint256 strahovoiVznos = _price * (1 - RegistrationCar[_to].Lifetime) * 1/delitel + 2/delitel*Users[_to].AmountUnpayFine+Users[_to].AmountDTP-2/delitel*Insurance[_to].StartYear ;
@@ -128,7 +130,7 @@ contract main {
     /**
     * @dev Функция выплаты страховки 
     */
-    function payInsurance(address _to) payable public onlyINC {
+    function payInsurance(address _to) payable public onlyUser  {
         uint256  amount =  Insurance[_to].InsuranceFee = msg.value * 10 ether; 
             address payable to = payable(_to);
             to.transfer(amount);
@@ -137,10 +139,11 @@ contract main {
     /**
     * @dev Функция выдачи страховки 
     */
-    function takeOutInsurance(address _to) internal onlyUser onlyINC {
+    function takeOutInsurance(address _to) internal onlyUser  {
+         require(_to != address(0), "zero address!");
         Insurance[_to] = strahovka(
             calculateInsurance(_to),
-            RegistrationCar[_to].MarketPrice, 
+            RegistrationCar[_to].MarketPrice,   
             RegistrationCar[_to].Lifetime,
             Users[_to].AmountUnpayFine,
             Users[_to].AmountDTP,
@@ -153,6 +156,7 @@ contract main {
     * @dev Отправка соглашения пользователя на оформление страховки
     */
     function sendRequests(bool _bool, address _to) payable public onlyUser returns (Request memory) {
+        require(_to != address(0), "zero address!");
         Request memory newRequest = Request ({
             _bool: _bool,
             amount: calculateInsurance(_to)
@@ -200,6 +204,7 @@ contract main {
     * @dev Функция оформления страховки 
     */
     function getInsurance() external onlyUser  returns (uint) {
+        require(Users[msg.sender].Insurance == false, "You have Insurance!");
         uint256 amount = calculateInsurance(msg.sender);
 
         return amount;
@@ -228,7 +233,8 @@ contract main {
     * @dev Функция подтверждения удостоверения (автоматически) 
     */
     function accessCard(address sender, uint128 _number, Kategory _kategory, uint256 _validLife) internal onlyUser returns (IdentifierCard memory) {
-        //require(_number == , "Number must have 3 characters!");
+        require(sender != address(0), "zero address!");
+        require(_number > 99 && _number < 1000, "Enter correct number!");
         IdentifierCardM[sender].Number = _number;
         IdentifierCardM[sender]._Kategory = _kategory;
         IdentifierCardM[sender].ValidLife = _validLife;
@@ -239,7 +245,9 @@ contract main {
     * @dev Функция подтверждения регистрации ТС водителя (автоматически)
     */
     function accessRegCar(address sender, Kategory _kategory, uint128 _marketPrice, uint128 _lifetime) internal onlyUser returns (TS memory) {
+        require(sender != address(0), "zero address!");
         require(IdentifierCardM[sender]._Kategory == _kategory, "Invalid Category!");
+        require(_kategory != Kategory.None);
         RegistrationCar[sender]._Kategory = _kategory;
         RegistrationCar[sender].MarketPrice = _marketPrice;
         RegistrationCar[sender].Lifetime = _lifetime;
@@ -251,6 +259,7 @@ contract main {
     * @dev Функция подтверждения продления удостоверения (автоматически) 
     */
     function accessLifeTime(address sender) internal onlyUser {
+        require(sender != address(0), "zero address!");
         IdentifierCardM[sender].ValidLife = block.timestamp + 63113852;
     }
 
@@ -258,6 +267,7 @@ contract main {
     * @dev Функция выписывания штрафа 
     */
     function setFine(address _to, uint256 _numberCard, string calldata _massage, uint128 amount) public onlySotrudnic {
+        require(_to != address(0), "zero address!");
         Users[_to].AmountUnpayFine++;
         Fines[_to].push(Fine(_to, _numberCard, amount, _massage, block.timestamp ));
 
@@ -267,6 +277,7 @@ contract main {
     * @dev Функция отметки ДТП и покрытие страховки 
     */
     function setDTP(address _to) payable public onlySotrudnic {
+        require(_to != address(0), "zero address!");
         Users[_to].AmountDTP++;
         if (Users[_to].Insurance == true) {
             payInsurance(_to); 
@@ -274,4 +285,14 @@ contract main {
     }
 
 
+
+
+
+
 }
+
+
+
+
+
+
